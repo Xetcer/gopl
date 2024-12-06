@@ -1,2 +1,2 @@
-# Go programming language book
+# Go programming - language book
 
