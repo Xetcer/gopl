@@ -1,2 +1,2 @@
-# gopl
-Go programming language 
+# Go programming language book
+
