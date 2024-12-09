@@ -24,3 +24,4 @@ go.work.sum
 # env file
 .env
 test.txt
+chpt01/excercises/fetchall/fetchResult.txt
