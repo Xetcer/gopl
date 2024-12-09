@@ -41,7 +41,7 @@ func main() {
 		}
 		http.HandleFunc("/", handler)
 		//!-http
-		log.Fatal(http.ListenAndServe("localhost:8000", nil))
+		log.Fatal(http.ListenAndServe(":8000", nil))
 		return
 	}
 	//!+main
@@ -61,6 +61,7 @@ func lissajous(out io.Writer) {
 	anim := gif.GIF{LoopCount: nframes}
 	phase := 0.0 // Разность фаз
 	colorIndex := uint8(greenIndex)
+	colorIndex = uint8(rand.Intn(3) + 1)
 	for i := 0; i < nframes; i++ {
 		rect := image.Rect(0, 0, 2*size+1, 2*size+1)
 		img := image.NewPaletted(rect, palette)
@@ -72,7 +73,6 @@ func lissajous(out io.Writer) {
 		phase += 0.1
 		anim.Delay = append(anim.Delay, delay)
 		anim.Image = append(anim.Image, img)
-		colorIndex = uint8(rand.Intn(3) + 1)
 	}
 	err := gif.EncodeAll(out, &anim)
 	if err != nil {
