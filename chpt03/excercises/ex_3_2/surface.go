@@ -73,6 +73,17 @@ func corner(i, j int) (float64, float64, error) {
 }
 
 func f(x, y float64) float64 {
-	r := math.Hypot(x, y) // Расстояние от (0, 0)
-	return math.Sin(r)
+	return eggform(x, y)
+}
+
+func climb(x, y float64) float64 {
+	return (math.Sin(x) / x) * (math.Sin(y) / y)
+}
+
+func eggform(x, y float64) float64 {
+	return math.Pow(2, math.Sin(x)) * math.Pow(2, math.Sin(y)) / 12
+}
+
+func saddle(x, y float64) float64 {
+	return math.Pow(x, 2)/math.Pow(25, 2) - math.Pow(y, 2)/math.Pow(17, 2)
 }
