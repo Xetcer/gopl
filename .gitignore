@@ -25,5 +25,4 @@ go.work.sum
 .env
 test.txt
 chpt01/excercises/fetchall/fetchResult.txt
-chpt03/surface/image.svg
-chpt03/excercises/ex_3_2/image.svg
+*.svg
