@@ -26,3 +26,4 @@ go.work.sum
 test.txt
 chpt01/excercises/fetchall/fetchResult.txt
 *.svg
+*.png
