@@ -5,7 +5,7 @@ import "testing"
 func TestReverse(t *testing.T) {
 
 	tests := []struct {
-		arr, want [5]int{}
+		arr, want [5]int
 	}{
 		{arr: [...]int{1, 2, 3, 4, 5}, want: [...]int{5, 4, 3, 2, 1}},
 	}
