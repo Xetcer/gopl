@@ -28,5 +28,4 @@ func main() {
 	fmt.Printf("%s\n", a)
 
 	fmt.Printf("%s\n", revUTF8([]byte(a)))
-
 }
