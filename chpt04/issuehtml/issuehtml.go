@@ -5,6 +5,7 @@
 
 // Issueshtml prints an HTML table of issues matching the search terms.
 // go run issuehtml.go repo:golang/go commenter:gopherbot json encoder>issues.html
+// go run issuehtml.go repo:golang/go 3133 10535 >issues2.html
 package main
 
 import (
