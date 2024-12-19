@@ -4,15 +4,8 @@ Exercise 5.8
 следует ли продолжать обход дерева. Воспользуйтесь ими для написания функции ElementBylD с приведенной ниже сигнатурой,
 которая находит первый HTML-элемент с указанным атрибутом id. Функция должна прекращать обход дерева,
 как только соответствующий элемент найден:
-
 func ElementByID(doc *html.Node, id string) *html.Node
-
-
-Modify forEachNode so that the pre and post functions return a boolean result indicating whether to continue the traversal.
-Use it to write a function ElementByID with the following signature that finds the first HTML element with
-the specified id attribute. The function should stop the traversal as soon as a match is found.
-
-func ElementByID(doc *html.Node, id string) *html.Node
+go run ex5_8.go -id=site-nav -url https://www.scrapethissite.com/pages/frames/?frame=i
 */
 
 package main
@@ -36,7 +29,6 @@ var (
 	id  = flag.String("id", "", "")
 )
 
-// usage go run ex5.8.go -id=site-nav -url https://www.scrapethissite.com/pages/frames/?frame=i
 func main() {
 	node, err := outline(*url, *id)
 	if err != nil {
