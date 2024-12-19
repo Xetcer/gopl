@@ -1,3 +1,6 @@
+/*
+go run outline2.go http://gopl.io
+*/
 package main
 
 import (
