@@ -33,7 +33,7 @@ func findLinks(url string) ([]string, error) {
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		resp.Body.Close()
+		resp.Body.Close() // гарантируем закрытие сетевых ресурсов системы для их освобождения.
 		return nil, fmt.Errorf("получение %s: %s", url, resp.Status)
 	}
 	doc, err := html.Parse(resp.Body)
