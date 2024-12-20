@@ -8,7 +8,7 @@ import (
 )
 
 func Extract(url string) ([]string, error) {
-	resp, err := http.Get(url)
+	resp, err := http.Get(url) // Отправляем запрос
 	if err != nil {
 		return nil, err
 	}
@@ -16,27 +16,27 @@ func Extract(url string) ([]string, error) {
 		resp.Body.Close()
 		return nil, fmt.Errorf("Получение %s: %s", url, resp.Status)
 	}
-	doc, err := html.Parse(resp.Body)
+	doc, err := html.Parse(resp.Body) // Получаем узлы HTML разметки
 	resp.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("анализ %s как HTML: %v", url, err)
 	}
 	var links []string
 	visitNode := func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == "a" {
-			for _, a := range n.Attr {
-				if a.Key != "href" {
-					continue
+		if n.Type == html.ElementNode && n.Data == "a" { // Если это элемент разметки и это ТЭГ ссылка <a>
+			for _, a := range n.Attr { // читаем все атрибуты ссылки
+				if a.Key != "href" { // Если находим атрибут не находим href
+					continue // переходим к следующему атрибуту
 				}
-				link, err := resp.Request.URL.Parse(a.Val)
-				if err != nil {
-					continue
+				link, err := resp.Request.URL.Parse(a.Val) // Пытаемся распарсить адрес ссылки
+				if err != nil {                            // Если не получилось
+					continue // продолжаем
 				}
-				links = append(links, link.String())
+				links = append(links, link.String()) // добавляем в список ссылок новую найденную
 			}
 		}
 	}
-	forEachNode(doc, visitNode, nil)
+	forEachNode(doc, visitNode, nil) // Перебираем все узлы, передавая в качестве pre функции visitNode
 	return links, nil
 }
 
