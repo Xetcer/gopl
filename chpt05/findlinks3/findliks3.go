@@ -1,11 +1,6 @@
 package main
 
-// Copyright © 2016 Alan A. A. Donovan & Brian W. Kernighan.
-// License: https://creativecommons.org/licenses/by-nc-sa/4.0/
-
-// See page 139.
-
-// Findlinks3 crawls the web, starting with the URLs on the command line.
+// go run findliks3.go https://golang.org
 
 import (
 	"fmt"
