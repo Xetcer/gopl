@@ -1,6 +1,12 @@
 package main
 
-// go run findliks3.go https://golang.org
+// Copyright © 2016 Alan A. A. Donovan & Brian W. Kernighan.
+// License: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+// See page 139.
+
+// Findlinks3 crawls the web, starting with the URLs on the command line.
+// Запуск go run findlinks3.go http://gopl.io
 
 import (
 	"fmt"
@@ -33,11 +39,14 @@ func crawl(url string) []string {
 	if err != nil {
 		log.Print(err) // если есть ошибка, выводим ее в лог
 	}
-	return list // воззвращаем список ссылок, найденных в URL
+	return list // воззвращаем список ссылок, найденныех
 }
 
+// !+main
 func main() {
 	// Crawl the web breadth-first,
 	// starting from the command-line arguments.
 	breadthFirst(crawl, os.Args[1:])
 }
+
+//!-main
