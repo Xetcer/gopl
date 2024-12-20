@@ -30,7 +30,7 @@ func outline(url string) error {
 	}
 
 	//!+call
-	forEachNode(doc, startElement, endElement)
+	forEachNode(doc)
 	//!-call
 
 	return nil
@@ -39,35 +39,44 @@ func outline(url string) error {
 // forEachNode вызывает функции pre(x) и post(x) для каждого узла х
 // в дереве с корнем п. Обе функции необязательны.
 // рге вызывается до посещения дочерних узлов, a post - после
-func forEachNode(n *html.Node, pre, post func(n *html.Node)) {
-	if pre != nil {
-		pre(n)
+func forEachNode(n *html.Node) {
+	var depth int
+	startElement := func(n *html.Node) {
+		if n.Type == html.ElementNode {
+			fmt.Printf("%*s</%s>\n", depth*2, "", n.Data)
+			depth++
+		}
 	}
+	endElement := func(n *html.Node) {
+		if n.Type == html.ElementNode {
+			depth--
+			fmt.Printf("%*s</%s>\n", depth*2, "", n.Data)
+		}
+	}
+	startElement(n)
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		forEachNode(c, pre, post)
+		forEachNode(c)
 	}
-	if post != nil {
-		post(n)
-	}
+	endElement(n)
 }
 
-var depth int
+// var depth int
 
-/*
-Эти функции также обеспечивают отступы с помощью еще одного трюка функции fmt.Printf.
-Символ * в %*s выводит строку, дополненную переменным количеством пробелов.
-Ширина вывода и выводимая строка переданы как аргументы depth*2 и ""
-*/
-func startElement(n *html.Node) {
-	if n.Type == html.ElementNode {
-		fmt.Printf("%*s</%s>\n", depth*2, "", n.Data)
-		depth++
-	}
-}
+// /*
+// Эти функции также обеспечивают отступы с помощью еще одного трюка функции fmt.Printf.
+// Символ * в %*s выводит строку, дополненную переменным количеством пробелов.
+// Ширина вывода и выводимая строка переданы как аргументы depth*2 и ""
+// */
+// func startElement(n *html.Node) {
+// 	if n.Type == html.ElementNode {
+// 		fmt.Printf("%*s</%s>\n", depth*2, "", n.Data)
+// 		depth++
+// 	}
+// }
 
-func endElement(n *html.Node) {
-	if n.Type == html.ElementNode {
-		depth--
-		fmt.Printf("%*s</%s>\n", depth*2, "", n.Data)
-	}
-}
+// func endElement(n *html.Node) {
+// 	if n.Type == html.ElementNode {
+// 		depth--
+// 		fmt.Printf("%*s</%s>\n", depth*2, "", n.Data)
+// 	}
+// }
