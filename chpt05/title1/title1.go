@@ -5,7 +5,8 @@ package main
 Функция title проверяет заголовок Content-Туре ответа сервера и возвращает ошибку,
 если документ не является документом HTML.
 
-go run title1.go http://gopl.io
+go run title1.go http://gopl.io - OK
+go run title1.go https://golang.org/doc/gopher/frontpage.png - Not OK
 */
 import (
 	"fmt"
