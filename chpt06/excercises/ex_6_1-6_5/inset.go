@@ -27,6 +27,13 @@ func (s *IntSet) Add(x int) {
 	// fmt.Println("XOR 1<<bit:", s.words)
 }
 
+// AddAll 6.2 добавляет список элеметов в множество
+func (s *IntSet) AddAll(vals ...int) {
+	for _, value := range vals {
+		s.Add(value)
+	}
+}
+
 // Remove 6.1 Удаляет x из множества
 func (s *IntSet) Remove(x int) {
 	word, bit := x/64, uint(x%64)
@@ -109,6 +116,9 @@ func main() {
 
 	new := x.Copy()
 	fmt.Println("New is:", new.String())
+
+	x.AddAll(4, 8, 15, 16, 23, 42)
+	fmt.Println("AddAll: ", x.String())
 
 	// x.Remove(1)
 	x.Remove(15)
