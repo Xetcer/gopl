@@ -1,5 +1,7 @@
 package main
 
+//  go run tempflag.go -temp 273.15K
+
 import (
 	"flag"
 	"fmt"
