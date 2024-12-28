@@ -71,7 +71,8 @@ func main() {
 	printTracks(tracks)
 
 	fmt.Println("\nCustom:")
-	// По
+	// По названию, если одинаковое то по году, если одинаковый год то по длине.
+	// иначе false
 	sort.Sort(customSort{tracks, func(x, y *Track) bool {
 		if x.Title != y.Title {
 			return x.Title < y.Title
