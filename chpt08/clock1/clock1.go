@@ -1,4 +1,5 @@
 // Clockl является TCP-сервером, периодически выводящим время.
+// go run clock1.go
 package main
 
 import (
