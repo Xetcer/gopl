@@ -1,5 +1,6 @@
 package main
 
+//  go run du2.go -v
 import (
 	"flag"
 	"fmt"
