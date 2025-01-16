@@ -17,7 +17,7 @@ type entry struct {
 	ready chan struct{} // Закрывается когда res готов
 }
 
-// request сообщение, требующее применение Func к Key
+// request - запрос, содержащий ключ и канал для отправки ответа.
 type request struct {
 	key      string
 	response chan<- result
@@ -37,9 +37,9 @@ func New(f Func) *Memo {
 	к получению ответа из этого канала.
 */
 func (memo *Memo) Get(key string) (interface{}, error) {
-	response := make(chan result)
-	memo.requests <- request{key, response}
-	res := <-response
+	response := make(chan result)           // Создаем канал ответа
+	memo.requests <- request{key, response} // закидываем его в канал запроса
+	res := <-response                       // ожидаем получения ответа из канала, который будет в функции deliver
 	return res.value, res.err
 }
 
@@ -52,29 +52,29 @@ func (memo *Memo) Close() { close(memo.requests) }
   если таковая не была найдена.
 */
 func (memo *Memo) server(f Func) {
-	cache := make(map[string]*entry)
-	for req := range memo.requests {
-		e := cache[req.key]
-		if e == nil {
+	cache := make(map[string]*entry) // создаем кэш
+	for req := range memo.requests { // для каждого нового запроса поступившего в канал запросов
+		e := cache[req.key] // смотрим есть такой запрос в кэше или нет
+		if e == nil {       // если его нет
 			// This is the first request for this key.
-			e = &entry{ready: make(chan struct{})}
-			cache[req.key] = e
-			go e.call(f, req.key) // call f(key)
+			e = &entry{ready: make(chan struct{})} // создаем экземпляр записи в кэш, где создаем канал который будет сообщать о готовности результата
+			cache[req.key] = e                     // Добавляем запись в кэш
+			go e.call(f, req.key)                  // call f(key)	// вызываем функцию вызова функции отправки запроса по ссылке
 		}
-		go e.deliver(req.response)
+		go e.deliver(req.response) // сообщаем о том что получили ответ на текущую ссылку
 	}
 }
 
 func (e *entry) call(f Func, key string) {
 	// Вычисление функции.
-	e.res.value, e.res.err = f(key)
+	e.res.value, e.res.err = f(key) // производим запрос по ссылке
 	//Оповещение о готовности
-	close(e.ready)
+	close(e.ready) // закрываем канал
 }
 
 func (e *entry) deliver(response chan<- result) {
 	// Ожидание готовности
-	<-e.ready
+	<-e.ready // пока не закрыт канал, который говорит о том что запрос по ссылке завершен ждем окончания
 	// отправка результата клиенту
-	response <- e.res
+	response <- e.res // передаем результат в канал ответа
 }
