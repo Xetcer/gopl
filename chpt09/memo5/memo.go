@@ -52,7 +52,7 @@ func (memo *Memo) Close() { close(memo.requests) }
   если таковая не была найдена.
 */
 func (memo *Memo) server(f Func) {
-	cache := make(map[string]*entry) // создаем кэш
+	cache := make(map[string]*entry) // создаем кэш записей
 	for req := range memo.requests { // для каждого нового запроса поступившего в канал запросов
 		e := cache[req.key] // смотрим есть такой запрос в кэше или нет
 		if e == nil {       // если его нет
