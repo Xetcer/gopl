@@ -18,7 +18,7 @@ import (
 )
 
 // !+httpRequestBody
-func httpGetBody(url string) (interface{}, error) {
+func httpGetBody(url string, done chan struct{}) (interface{}, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ type M interface {
 }
 
 type MCancel interface {
-	GetCancel(key string, done chan struct{}) (interface{}, error)
+	Get(key string, done chan struct{}) (interface{}, error)
 }
 
 /*
@@ -65,11 +65,11 @@ type MCancel interface {
 //!-seq
 */
 
-func Sequential(t *testing.T, m M) {
+func Sequential(t *testing.T, m MCancel) {
 	//!+seq
 	for url := range incomingURLs() {
 		start := time.Now()
-		value, err := m.Get(url)
+		value, err := m.Get(url, nil)
 		if err != nil {
 			log.Print(err)
 			continue
@@ -80,13 +80,7 @@ func Sequential(t *testing.T, m M) {
 	//!-seq
 }
 
-/*
-//!+conc
-	m := memo.New(httpGetBody)
-//!-conc
-*/
-
-func Concurrent(t *testing.T, m M) {
+func Concurrent(t *testing.T, m MCancel) {
 	//!+conc
 	var n sync.WaitGroup
 	for url := range incomingURLs() {
@@ -94,7 +88,7 @@ func Concurrent(t *testing.T, m M) {
 		go func(url string) {
 			defer n.Done()
 			start := time.Now()
-			value, err := m.Get(url)
+			value, err := m.Get(url, nil)
 			if err != nil {
 				log.Print(err)
 				return
@@ -107,80 +101,24 @@ func Concurrent(t *testing.T, m M) {
 	//!-conc
 }
 
-func ConcurrentWithCancelOk(t *testing.T, m MCancel) {
-	//!+conc
+func ConcurrentWithCancelDelay(t *testing.T, m MCancel) {
 	var n sync.WaitGroup
+	cancelCh := make(chan struct{})
+	var firstMu sync.Mutex
+	isFirst := true
 	for url := range incomingURLs() {
 		n.Add(1)
 		go func(url string) {
 			defer n.Done()
 			start := time.Now()
 			cancel := make(chan struct{})
-			value, err := m.GetCancel(url, cancel)
-			if err != nil {
-				log.Print(err)
-				return
+			firstMu.Lock()
+			if isFirst {
+				cancel = cancelCh
+				isFirst = false
 			}
-			if value != nil {
-				fmt.Printf("%s, %s, %d bytes\n",
-					url, time.Since(start), len(value.([]byte)))
-			} else {
-				fmt.Printf("%s, %s, operation is canceled\n",
-					url, time.Since(start))
-			}
-
-		}(url)
-	}
-	n.Wait()
-	//!-conc
-}
-
-func ConcurrentWitchCancelAll(t *testing.T, m MCancel) {
-	//!+conc
-	var n sync.WaitGroup
-	for url := range incomingURLs() {
-		n.Add(1)
-		go func(url string) {
-			defer n.Done()
-			start := time.Now()
-			cancel := make(chan struct{})
-			close(cancel)
-			value, err := m.GetCancel(url, cancel)
-			if err != nil {
-				log.Print(err)
-				return
-			}
-			if value != nil {
-				fmt.Printf("%s, %s, %d bytes\n",
-					url, time.Since(start), len(value.([]byte)))
-			} else {
-				fmt.Printf("%s, %s, operation is canceled\n",
-					url, time.Since(start))
-			}
-
-		}(url)
-	}
-	n.Wait()
-	//!-conc
-}
-
-func ConcurrentWitchCancelPartlty(t *testing.T, m MCancel) {
-	//!+conc
-	var n sync.WaitGroup
-	GoCounter := 0
-	for url := range incomingURLs() {
-		n.Add(1)
-		GoCounter++
-		go func(url string) {
-			defer n.Done()
-			start := time.Now()
-			cancel := make(chan struct{})
-			if _, ok := <-cancel; ok {
-				if GoCounter%2 != 0 {
-					close(cancel)
-				}
-			}
-			value, err := m.GetCancel(url, cancel)
+			firstMu.Unlock()
+			value, err := m.Get(url, cancel)
 			if err != nil {
 				log.Print(err)
 				return
@@ -194,6 +132,7 @@ func ConcurrentWitchCancelPartlty(t *testing.T, m MCancel) {
 			}
 		}(url)
 	}
+	time.Sleep(1 * time.Second)
+	close(cancelCh)
 	n.Wait()
-	//!-conc
 }
