@@ -101,6 +101,9 @@ func (memo *Memo) Get(key string, done chan struct{}) (value interface{}, err er
 			// повторный запрос данного ключа.
 			memo.mu.Unlock()
 			select {
+			case <-done:
+				fmt.Println("Waiting goroutine is canceled", key)
+				return nil, nil
 			case <-e.ready: // Ожидание готовности
 				fmt.Println("Waiting goroutine is finished", key)
 				return e.res.value, e.res.err
