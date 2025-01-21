@@ -132,7 +132,7 @@ func ConcurrentWithCancelDelay(t *testing.T, m MCancel) {
 			}
 		}(url)
 	}
-	time.Sleep(1 * time.Second)
+	// time.Sleep(1 * time.Second)
 	close(cancelCh)
 	n.Wait()
 }

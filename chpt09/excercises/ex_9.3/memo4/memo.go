@@ -19,7 +19,6 @@ package memo
 import (
 	"fmt"
 	"sync"
-	"time"
 )
 
 // Func является типом функции с запоминанием
@@ -85,14 +84,14 @@ func (memo *Memo) Get(key string, done chan struct{}) (value interface{}, err er
 			memo.cache[key] = e
 			memo.mu.Unlock()
 			fmt.Println("Starting goroutine with key", key)
-			time.Sleep(2 * time.Second)
+			// time.Sleep(2 * time.Second)
 			e.res.value, e.res.err = memo.f(key, done)
 			if IsCancelled(done) {
 				fmt.Println("Canceled!", key)
-				close(e.cancelled) // широковещательное оповещение об отмене запроса
 				memo.mu.Lock()
 				delete(memo.cache, key) // удаляем из кэш запись
 				memo.mu.Unlock()
+				close(e.cancelled) // широковещательное оповещение об отмене запроса
 				return nil, nil
 			} else {
 				close(e.ready) // Широковещательное оповещение о готовности
