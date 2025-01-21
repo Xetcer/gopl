@@ -21,6 +21,8 @@ import (
 	"sync"
 )
 
+const CanselErr = "Cancelled by user!"
+
 // Func является типом функции с запоминанием
 type Func func(key string, done chan struct{}) (interface{}, error)
 type result struct {
@@ -95,7 +97,7 @@ func (memo *Memo) Get(key string, done chan struct{}) (value interface{}, err er
 				delete(memo.cache, key) // удаляем из кэш запись
 				memo.mu.Unlock()
 				close(e.cancelled) // широковещательное оповещение об отмене запроса
-				return nil, nil
+				return nil, fmt.Errorf(CanselErr)
 			} else {
 				close(e.ready) // Широковещательное оповещение о готовности
 				fmt.Println("Main goroutine is finished", key)
@@ -107,7 +109,7 @@ func (memo *Memo) Get(key string, done chan struct{}) (value interface{}, err er
 			select {
 			case <-done:
 				fmt.Println("Waiting goroutine is canceled", key)
-				return nil, nil
+				return nil, fmt.Errorf(CanselErr)
 			case <-e.ready: // Ожидание готовности
 				fmt.Println("Waiting goroutine is finished", key)
 				return e.res.value, e.res.err
