@@ -29,8 +29,9 @@ type result struct {
 	err   error
 }
 type entry struct {
-	res   result
-	ready chan struct{} // Закрывается когда res готов
+	res       result
+	ready     chan struct{} // Закрывается когда res готов
+	cancelled chan struct{} // Закрывается когда случилась отмена
 }
 
 type Memo struct {
@@ -80,16 +81,17 @@ func (memo *Memo) Get(key string, done chan struct{}) (value interface{}, err er
 			// Это первый запрос данного ключа.
 			// Эта go-подпрограмма становится ответственной за
 			// вычисление значения и оповещение о готовности.
-			e = &entry{ready: make(chan struct{})}
+			e = &entry{ready: make(chan struct{}), cancelled: make(chan struct{})}
 			memo.cache[key] = e
 			memo.mu.Unlock()
 			fmt.Println("Starting goroutine with key", key)
-			time.Sleep(5 * time.Second)
+			time.Sleep(2 * time.Second)
 			e.res.value, e.res.err = memo.f(key, done)
 			if IsCancelled(done) {
 				fmt.Println("Canceled!", key)
+				close(e.cancelled) // широковещательное оповещение об отмене запроса
 				memo.mu.Lock()
-				delete(memo.cache, key)
+				delete(memo.cache, key) // удаляем из кэш запись
 				memo.mu.Unlock()
 				return nil, nil
 			} else {
@@ -107,8 +109,49 @@ func (memo *Memo) Get(key string, done chan struct{}) (value interface{}, err er
 			case <-e.ready: // Ожидание готовности
 				fmt.Println("Waiting goroutine is finished", key)
 				return e.res.value, e.res.err
-			default: // начинаем цикл сначала
+			case <-e.cancelled: // начинаем цикл сначала
 			}
 		}
 	}
 }
+
+// func (memo *Memo) Get(key string, done chan struct{}) (value interface{}, err error) {
+// 	for {
+// 		memo.mu.Lock()
+// 		e := memo.cache[key]
+// 		if e == nil {
+// 			// Это первый запрос данного ключа.
+// 			// Эта go-подпрограмма становится ответственной за
+// 			// вычисление значения и оповещение о готовности.
+// 			e = &entry{ready: make(chan struct{})}
+// 			memo.cache[key] = e
+// 			memo.mu.Unlock()
+// 			fmt.Println("Starting goroutine with key", key)
+// 			time.Sleep(5 * time.Second)
+// 			e.res.value, e.res.err = memo.f(key, done)
+// 			if IsCancelled(done) {
+// 				fmt.Println("Canceled!", key)
+// 				memo.mu.Lock()
+// 				delete(memo.cache, key)
+// 				memo.mu.Unlock()
+// 				return nil, nil
+// 			} else {
+// 				close(e.ready) // Широковещательное оповещение о готовности
+// 				fmt.Println("Main goroutine is finished", key)
+// 				return e.res.value, e.res.err
+// 			}
+// 		} else {
+// 			// повторный запрос данного ключа.
+// 			memo.mu.Unlock()
+// 			select {
+// 			case <-done:
+// 				fmt.Println("Waiting goroutine is canceled", key)
+// 				return nil, nil
+// 			case <-e.ready: // Ожидание готовности
+// 				fmt.Println("Waiting goroutine is finished", key)
+// 				return e.res.value, e.res.err
+// 			default: // начинаем цикл сначала
+// 			}
+// 		}
+// 	}
+// }
