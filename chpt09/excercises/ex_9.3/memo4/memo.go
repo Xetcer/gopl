@@ -44,6 +44,9 @@ func New(f Func) *Memo {
 }
 
 func IsCancelled(done chan struct{}) bool {
+	if done == nil {
+		return false
+	}
 	select {
 	case <-done:
 		return true
