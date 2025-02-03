@@ -33,11 +33,11 @@ func getPackages() ([]pkg, error) {
 	dec := json.NewDecoder(bytes.NewReader(out))
 	for {
 		var pkg pkg
-		if err := dec.Decode(&pkg); errors.Is(err, io.EOF) {
-			break
-		}
+		err := dec.Decode(&pkg)
+		errors.Is(err, io.EOF)
 		if err != nil {
-			return nil, err
+			break
+			// return nil, err
 		}
 		packages = append(packages, pkg)
 	}
