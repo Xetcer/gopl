@@ -9,6 +9,11 @@ import (
 	"os"
 )
 
+/*
+ _ "image/png" Без этой строки программа будет компилироваться и компоноваться как обычно,
+  но может не распознавать или декодировать ввод в формате PNG:
+*/
+
 func main() {
 	if err := toJPEG(os.Stdin, os.Stdout); err != nil {
 		fmt.Fprintf(os.Stderr, "jpeg: %v\n", err)
