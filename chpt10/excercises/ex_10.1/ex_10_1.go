@@ -40,4 +40,5 @@ func convertTo(in io.Reader, out io.Writer, outKind string) error {
 
 		}
 	}
+	return fmt.Errorf("new format is equal of old one format")
 }
